@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
         Vector2 direction = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
         if (direction != Vector2.zero)
         {
-            
+            transform.Translate(direction * moveSpeed * Time.deltaTime, Space.World);
         }
     }
 }
