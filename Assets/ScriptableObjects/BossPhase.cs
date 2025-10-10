@@ -8,6 +8,6 @@ namespace ScriptableObjects
     {
         public List<Pattern> BossPatterns = new();
         public float maxLife;
-        
+        public Texture2D bossSprite;
     }
 }
