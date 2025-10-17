@@ -22,7 +22,7 @@ namespace Patterns
                     
                 foreach (var currentLaser in _currentStep.SpawnedLasers)
                 {
-                    GameObject temp = Object.Instantiate(currentLaser.Spawned);
+                    GameObject temp = Instantiate(currentLaser.Spawned);
                     tempObjects.Add(temp.GetComponent<LineRenderer>());
 
                     tempObjects.Last().SetPosition(0, temp.transform.position);
@@ -49,7 +49,7 @@ namespace Patterns
                 for (; tempObjects.Count != 0; )
                 {
                     var tempObject = tempObjects[0];
-                    Object.Destroy(tempObject);
+                    Destroy(tempObject);
                     tempObjects.RemoveAt(0);
                 }
                 tempObjects.Clear();

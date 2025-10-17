@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.IO;
 using ScriptableObjects;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 namespace Editor.Utils
 {
@@ -23,13 +25,14 @@ namespace Editor.Utils
                 string assetsPath = Application.dataPath + "/AddedSprite";
                 if (!Directory.Exists(assetsPath)) Directory.CreateDirectory(assetsPath);
                 AssetDatabase.Refresh();
-                DirectoryInfo info = new DirectoryInfo("Assets/AddedSprite");
-                FileUtil.CopyFileOrDirectory(path, assetsPath + "/newDataImage" + info.GetFiles().Length + ".png");
-                var files = info.GetFiles();
+                DirectoryInfo dirInfo = new DirectoryInfo("Assets/AddedSprite");
+                FileInfo originalInfo = new FileInfo(path);
+                FileUtil.CopyFileOrDirectory(path, assetsPath + "/newDataImage" + Random.Range(0,Int32.MaxValue) + originalInfo.Extension);;
+                var files = dirInfo.GetFiles();
                 AssetDatabase.ImportAsset("Assets/AddedSprite/" + files[files.Length - 1].Name);
+                AssetDatabase.Refresh();
                 temp = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/AddedSprite/" + files[files.Length - 1].Name);
                 bossPhase.bossSprite = temp;
-                AssetDatabase.Refresh();
             }
             
             yield return null;

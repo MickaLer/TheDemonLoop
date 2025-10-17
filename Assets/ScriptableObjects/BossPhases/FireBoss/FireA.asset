@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b31f3948b444f108e90c5dfdf794770, type: 3}
   m_Name: FireA
   m_EditorClassIdentifier: 
-  maxLife: 100
+  maxLife: 1000
+  bossSprite: {fileID: 2800000, guid: f6daec291b469274195d3effa489d47f, type: 3}

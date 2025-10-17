@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Editor.Utils;
+using Patterns;
 using ScriptableObjects;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 namespace Editor.Windows
 {
@@ -60,7 +62,8 @@ namespace Editor.Windows
         private void OnGUI()
         {
             LeftPanel();
-            MiddlePanel();
+            MiddleLeftPanel();
+            MiddleRightPanel();
             RightPanel();
         }
 
@@ -69,6 +72,7 @@ namespace Editor.Windows
             //Rename, select, create or remove bosses folders
             GUILayout.BeginArea(new Rect(30, 100, 100, 300));
             GUILayout.BeginVertical();
+            GUILayout.Label("List of bosses :");
             _scrollPositionLeft = GUILayout.BeginScrollView(_scrollPositionLeft);
             SelectedBoss = GUILayout.SelectionGrid(SelectedBoss, _bossNames.ToArray(), 1);
             GUILayout.EndScrollView();
@@ -79,9 +83,11 @@ namespace Editor.Windows
             {
                 string newName = "newBoss" + _bossNames.Count;
                 _bossNames.Add(newName);
-                SelectedBoss = _bossNames.Count - 1;
-                _mainDir.CreateSubdirectory(newName);
+                DirectoryInfo newDir = _mainDir.CreateSubdirectory(newName);
                 AssetDatabase.Refresh();
+                newDir.CreateSubdirectory("Patterns");
+                AssetDatabase.Refresh();
+                SelectedBoss = _bossNames.Count - 1;
             }
 
             GUI.color = _baseColor;
@@ -125,11 +131,12 @@ namespace Editor.Windows
             GUILayout.EndArea();
         }
 
-        private void MiddlePanel()
+        private void MiddleLeftPanel()
         {
             //Select, rename, add or remove Phases
             GUILayout.BeginArea(new Rect(150, 100, 100, 300));
             GUILayout.BeginVertical();
+            GUILayout.Label("List of phases :");
             _scrollPositionMiddle = GUILayout.BeginScrollView(_scrollPositionMiddle);
             _selectedPhase = GUILayout.SelectionGrid(_selectedPhase, _bossPhases.Select(o => o.name).ToArray(), 1);
             GUILayout.EndScrollView();
@@ -190,48 +197,129 @@ namespace Editor.Windows
             GUILayout.EndArea();
         }
 
-        private void RightPanel()
+        private void MiddleRightPanel()
         {
-            //Modify Phases
+            //Modify Global Stats
+            if (_bossPhases.Count == 0) return;
+            BossPhase current = _bossPhases[_selectedPhase];
             if (0 >= _bossPhases.Count) return;
-            GUILayout.BeginArea(new Rect(270, 50, position.width - 300, position.height - 100));
-            GUILayout.BeginArea(new Rect(0, 0,320, position.height - 100));
-
+            GUILayout.BeginArea(new Rect(270, 50,320, position.height - 100));
             GUILayout.BeginVertical();
-            if (GUILayout.Button(_bossPhases[_selectedPhase].bossSprite, GUILayout.Width(320), GUILayout.Height(180)))
+            if (GUILayout.Button(current.bossSprite, GUILayout.Width(320), GUILayout.Height(180)))
             {
-                string tempValue = EditorUtility.OpenFilePanel("Select a texture", "", "png");
-                if(tempValue != "") EditorCoroutineUtility.StartCoroutine(TextureUtils.LoadTextureFromPath(tempValue, _bossPhases[_selectedPhase]), this);
+                string tempValue = EditorUtility.OpenFilePanel("Select a texture", "", "png,jpg");
+                if(tempValue != "")
+                {
+                    EditorCoroutineUtility.StartCoroutine( TextureUtils.LoadTextureFromPath(tempValue, current), this);
+                    EditorUtility.SetDirty(current);
+                }
             }
-            _bossPhases[_selectedPhase].maxLife = EditorGUILayout.FloatField("Max Life", _bossPhases[_selectedPhase].maxLife);
-            _scrollPositionRight = GUILayout.BeginScrollView(_scrollPositionRight);
-            _selectedPhase = GUILayout.SelectionGrid(_selectedPhase, _bossPhases[_selectedPhase].BossPatterns.Select(o => o.PatternName).ToArray(), 1);
-            GUILayout.EndScrollView();
-            GUILayout.BeginHorizontal();
-            GUI.color = Color.green;
-            if (GUILayout.Button("Add"))
-            {
-                
-            }
-
-            GUI.color = _baseColor;
-
-            GUI.color = Color.red;
-            if (GUILayout.Button("Remove"))
-            {
-               
-            }
-
-            GUI.color = _baseColor;
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Rename"))
-            {
-                
-            }
+            current.maxLife = EditorGUILayout.FloatField("Max Life", current.maxLife);
             GUILayout.EndVertical();
             GUILayout.EndArea();
+        }
+        
+        private void RightPanel()
+        {
+            //Modify patterns
+            if (_bossPhases.Count == 0) return;
+            BossPhase current = _bossPhases[_selectedPhase];
+            GUILayout.BeginArea(new Rect(590, 50,position.width - 620, position.height - 100));
+            GUILayout.BeginVertical();
+            GUILayout.Label("List of patterns :");
+            _scrollPositionRight = GUILayout.BeginScrollView(_scrollPositionRight);
+            
+            var temp = current.BossPatterns;
+            for (var index = 0; index < current.BossPatterns.Count; index++)
+            {
+                GUILayout.BeginHorizontal();
+                var patternList = current.BossPatterns[index];
+                for (var i = 0; i < temp[index].Count; i++)
+                {
+                    if(i == patternList.Count) break;
+                    var patternPiece = patternList[i];
+                    if (GUILayout.Button(patternPiece.name))
+                    {
+                    }
+                    CreatePatternButton(patternList, patternPiece);
+                }
+
+                if (current.BossPatterns[index] != patternList) break;
+                GUI.color = Color.green;
+                if (GUILayout.Button("+"))
+                {
+                    GenericMenu contextMenu = new GenericMenu();
+                    contextMenu.AddItem(new GUIContent("SpawnLaser"), false,
+                        () =>
+                        {
+                            string newName = AssetDatabase.GenerateUniqueAssetPath(_mainPath +
+                                _bossNames[SelectedBoss] +
+                                "/Patterns/newSpawnLaserPattern" + Random.Range(0, Int32.MaxValue) + ".asset");
+                            SpawnLaserPattern asset = CreateInstance<SpawnLaserPattern>();
+                            AssetDatabase.CreateAsset(asset, newName);
+                            AssetDatabase.SaveAssets();
+                            AssetDatabase.Refresh();
+                            patternList.Add(asset);
+                        });
+                    contextMenu.ShowAsContext();
+                }
+
+                GUI.color = _baseColor;
+                GUILayout.EndHorizontal();
+            }
+
+            if (GUILayout.Button("+", GUILayout.Width(20),GUILayout.Height(20)))
+            {
+                current.BossPatterns.Add(new List<Pattern>());
+            }
+            
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
             GUILayout.EndArea();
+            //if(current.BossPatterns.Count != 0) ShowPatternValues(current.BossPatterns[_selectPattern]);
+        }
+
+        private void ShowPatternValues(Pattern currentPattern)
+        {
+            switch (currentPattern)
+            {
+                case SpawnLaserPattern pattern:
+                    
+                    break;
+            }
+        }
+
+        private void CreatePatternButton(List<Pattern> currentList, Pattern currentPattern)
+        {
+            if (GUILayout.Button("Rename"))
+            {
+                string oldName = currentPattern.name;
+                Rect buttonRect = GUILayoutUtility.GetLastRect();
+                PopupWindow.Show(
+                    new Rect(buttonRect.x, buttonRect.yMax + 20, 0, 0),
+                    new StringEditorPopup(oldName, (newValue) =>
+                    {
+                        AssetDatabase.MoveAsset(_mainPath + _bossNames[SelectedBoss] + "/Patterns/" + oldName + ".asset", _mainPath + _bossNames[SelectedBoss] + "/Patterns/" + newValue + ".asset");
+                        AssetDatabase.Refresh();
+                        Repaint();
+                    })
+                );
+            }
+            GUI.color = Color.red;
+            if (GUILayout.Button("-"))
+            {
+                currentList.Remove(currentPattern);
+                AssetDatabase.DeleteAsset(_mainPath + _bossNames[SelectedBoss] + "/Patterns/" + currentPattern.name + ".asset");
+                AssetDatabase.Refresh();
+                if(currentList.Count == 0) _bossPhases[_selectedPhase].BossPatterns.Remove(currentList);
+            }
+
+            GUI.color = _baseColor;
+        }
+
+        private void PatternButtonCallback(Pattern pattern)
+        {
+            
         }
 
         private void LoadSelectedBoss(int selected)
