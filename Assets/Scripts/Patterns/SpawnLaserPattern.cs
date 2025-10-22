@@ -1,43 +1,49 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Managers;
 using UnityEngine;
 
 namespace Patterns
 {
     public class SpawnLaserPattern : Pattern
     {
-        public Queue<Step> Steps =  new();
+        public List<Step> steps =  new();
         private Step _currentStep;
 
         private float _innerCount;
         
         public override IEnumerator Do()
         {
+            Step[] tempSteps = new Step[steps.Count];
+            steps.CopyTo(tempSteps);
+            int currentIndex = 0;
+            Transform bossTransform = GameManager.CurrentBoss.gameObject.transform;
             while (true)
             {
-                _currentStep = Steps.Dequeue();
+                _currentStep = tempSteps[currentIndex];
 
                 List<LineRenderer> tempObjects = new List<LineRenderer>();
                     
-                foreach (var currentLaser in _currentStep.SpawnedLasers)
+                foreach (var currentLaser in _currentStep.spawnedLasers)
                 {
-                    GameObject temp = Instantiate(currentLaser.Spawned);
+                    GameObject temp = Instantiate(currentLaser.spawned, bossTransform.position, Quaternion.identity, bossTransform);
                     tempObjects.Add(temp.GetComponent<LineRenderer>());
 
                     tempObjects.Last().SetPosition(0, temp.transform.position);
-                    ModifyLaser(tempObjects.Last(), currentLaser.Angle);
+                    ModifyLaser(tempObjects.Last(), currentLaser.angle);
                 }
 
-                while (_innerCount < _currentStep.Duration)
+                while (_innerCount < _currentStep.duration)
                 {
-                    if (_currentStep.Direction != 0)
+                    if (_currentStep.direction != 0)
                     {
                         for (var index = 0; index < tempObjects.Count; index++)
                         {
                             var tempLaser = tempObjects[index];
-                            var spawnLaser = _currentStep.SpawnedLasers[index];
-                            ModifyLaser(tempLaser, spawnLaser.Angle + _innerCount * _currentStep.Speed * _currentStep.Direction);
+                            var spawnLaser = _currentStep.spawnedLasers[index];
+                            ModifyLaser(tempLaser, spawnLaser.angle + _innerCount * _currentStep.speed * _currentStep.direction);
                         }
                     }
                     
@@ -49,13 +55,14 @@ namespace Patterns
                 for (; tempObjects.Count != 0; )
                 {
                     var tempObject = tempObjects[0];
-                    Destroy(tempObject);
+                    Destroy(tempObject.gameObject);
                     tempObjects.RemoveAt(0);
                 }
                 tempObjects.Clear();
                 yield return new WaitForEndOfFrame();
                 _innerCount = 0;
-                if (Steps.Count <= 0) break;
+                currentIndex++;
+                if (currentIndex >= steps.Count) break;
             }
         }
 
@@ -67,23 +74,25 @@ namespace Patterns
             
             if (hit2D.collider)
             {
-                laser.SetPosition(1, hit2D.transform.position);
+                laser.SetPosition(1, hit2D.point);
             }
         }
 
+        [Serializable]
         public struct Step
         {
-            public float Direction;
-            public float Duration;
-            public float Speed;
-            public List<Laser> SpawnedLasers;
+            public float direction;
+            public float duration;
+            public float speed;
+            public List<Laser> spawnedLasers;
+            public int order;
         }
-
+        [Serializable]
         public struct Laser
         {
-            public float Angle;
-            public float Radius;
-            public GameObject Spawned;
+            public float angle;
+            public float radius;
+            public GameObject spawned;
         }
     }
 }

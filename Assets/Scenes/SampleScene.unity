@@ -678,6 +678,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc5ef5b4b6564af9845adaa585c9f6e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bossPhases:
+  - {fileID: 11400000, guid: 56b1f688646e1a345b1c13ca89daedcd, type: 2}
 --- !u!1 &962940371
 GameObject:
   m_ObjectHideFlags: 0

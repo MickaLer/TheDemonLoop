@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Editor.Utils;
+using Editor.Windows.PatternEditor;
 using Patterns;
 using ScriptableObjects;
 using Unity.EditorCoroutines.Editor;
@@ -21,8 +22,8 @@ namespace Editor.Windows
             wnd.titleContent = new GUIContent("CreateBoss");
         }
 
-        private List<string> _bossNames = new();
-        private List<BossPhase> _bossPhases = new();
+        private readonly List<string> _bossNames = new();
+        private readonly List<BossPhase> _bossPhases = new();
         private Vector2 _scrollPositionLeft;
         private Vector2 _scrollPositionMiddle;
         private Vector2 _scrollPositionRight;
@@ -31,7 +32,7 @@ namespace Editor.Windows
         private int _selectPattern;
         private Color _baseColor;
 
-        public int SelectedBoss
+        private int SelectedBoss
         {
             get => _selectedBoss;
             set
@@ -215,6 +216,7 @@ namespace Editor.Windows
                 }
             }
             current.maxLife = EditorGUILayout.FloatField("Max Life", current.maxLife);
+            current.patternCooldown = EditorGUILayout.FloatField("Pattern cooldown", current.patternCooldown);
             GUILayout.EndVertical();
             GUILayout.EndArea();
         }
@@ -229,22 +231,24 @@ namespace Editor.Windows
             GUILayout.Label("List of patterns :");
             _scrollPositionRight = GUILayout.BeginScrollView(_scrollPositionRight);
             
-            var temp = current.BossPatterns;
-            for (var index = 0; index < current.BossPatterns.Count; index++)
+            var temp = current.bossPatterns;
+            for (var index = 0; index < current.bossPatterns.Count; index++)
             {
                 GUILayout.BeginHorizontal();
-                var patternList = current.BossPatterns[index];
-                for (var i = 0; i < temp[index].Count; i++)
+                var patternList = current.bossPatterns[index];
+                for (var i = 0; i < temp[index].patterns.Count; i++)
                 {
-                    if(i == patternList.Count) break;
-                    var patternPiece = patternList[i];
-                    if (GUILayout.Button(patternPiece.name))
-                    {
-                    }
+                    var patternPiece = patternList.patterns[i];
+                    if (GUILayout.Button(patternPiece.name)) OpenPatternWindow(patternPiece);
                     CreatePatternButton(patternList, patternPiece);
+                    if(i >= patternList.patterns.Count) break;
                 }
 
-                if (current.BossPatterns[index] != patternList) break;
+                if (current.bossPatterns.Count <= index || current.bossPatterns[index].patterns != patternList.patterns)
+                {
+                    GUILayout.EndHorizontal();
+                    break;
+                }
                 GUI.color = Color.green;
                 if (GUILayout.Button("+"))
                 {
@@ -259,7 +263,8 @@ namespace Editor.Windows
                             AssetDatabase.CreateAsset(asset, newName);
                             AssetDatabase.SaveAssets();
                             AssetDatabase.Refresh();
-                            patternList.Add(asset);
+                            patternList.patterns.Add(asset);
+                            EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
                         });
                     contextMenu.ShowAsContext();
                 }
@@ -270,26 +275,26 @@ namespace Editor.Windows
 
             if (GUILayout.Button("+", GUILayout.Width(20),GUILayout.Height(20)))
             {
-                current.BossPatterns.Add(new List<Pattern>());
+                current.bossPatterns.Add(new BossPhaseData(){patterns = new()});
+                EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
             }
             
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
             GUILayout.EndArea();
-            //if(current.BossPatterns.Count != 0) ShowPatternValues(current.BossPatterns[_selectPattern]);
         }
 
-        private void ShowPatternValues(Pattern currentPattern)
+        private void OpenPatternWindow(Pattern pattern)
         {
-            switch (currentPattern)
+            switch (pattern)
             {
-                case SpawnLaserPattern pattern:
-                    
+                case SpawnLaserPattern:
+                    LaserPatternWindow.ShowWindow(pattern);
                     break;
             }
         }
-
-        private void CreatePatternButton(List<Pattern> currentList, Pattern currentPattern)
+        
+        private void CreatePatternButton(BossPhaseData currentList, Pattern currentPattern)
         {
             if (GUILayout.Button("Rename"))
             {
@@ -302,31 +307,28 @@ namespace Editor.Windows
                         AssetDatabase.MoveAsset(_mainPath + _bossNames[SelectedBoss] + "/Patterns/" + oldName + ".asset", _mainPath + _bossNames[SelectedBoss] + "/Patterns/" + newValue + ".asset");
                         AssetDatabase.Refresh();
                         Repaint();
+                        EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
                     })
+                    
                 );
             }
             GUI.color = Color.red;
             if (GUILayout.Button("-"))
             {
-                currentList.Remove(currentPattern);
+                currentList.patterns.Remove(currentPattern);
                 AssetDatabase.DeleteAsset(_mainPath + _bossNames[SelectedBoss] + "/Patterns/" + currentPattern.name + ".asset");
                 AssetDatabase.Refresh();
-                if(currentList.Count == 0) _bossPhases[_selectedPhase].BossPatterns.Remove(currentList);
+                if(currentList.patterns.Count == 0) _bossPhases[_selectedPhase].bossPatterns.Remove(currentList);
+                EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
             }
 
             GUI.color = _baseColor;
-        }
-
-        private void PatternButtonCallback(Pattern pattern)
-        {
-            
         }
 
         private void LoadSelectedBoss(int selected)
             {
                 _bossPhases.Clear();
                 DirectoryInfo info = new DirectoryInfo(_mainPath + "/" + _bossNames[selected]);
-                ;
                 foreach (var file in info.GetFiles("*.asset"))
                 {
                     var temp = AssetDatabase.LoadAssetAtPath<BossPhase>(_mainPath + "/" + _bossNames[selected] + "/" +
