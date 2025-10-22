@@ -32,6 +32,13 @@ public abstract class BossBehaviour : MonoBehaviour
     {
         foreach (var currentPattern in pattern)
         {
+            // If the followingPatternDelay is -1, that means that the next pattern will be played along the current one
+            // ReSharper disable CompareOfFloatsByEqualityOperator once
+            if (currentPattern.followingPatternDelay == -1)
+            {
+                StartCoroutine(currentPattern.Do());
+                continue;
+            }
             yield return currentPattern.Do();
             yield return new WaitForSeconds(currentPattern.followingPatternDelay);
         }
@@ -44,6 +51,8 @@ public abstract class BossBehaviour : MonoBehaviour
         DamageableComp = GetComponent<Damageable>();
         OwnSprite = GetComponent<SpriteRenderer>();
         CurrentPhase = bossPhases[0];
+        
+        //Load the sprite stocked inside the phase
         OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
         GameManager.StartFight(this);
         DamageableComp.OnDeath += ChangePhase;

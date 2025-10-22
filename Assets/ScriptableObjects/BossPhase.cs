@@ -23,12 +23,10 @@ namespace ScriptableObjects
         {
             return Equals(patterns, other.patterns);
         }
-
         public override bool Equals(object obj)
         {
             return obj is BossPhaseData other && Equals(other);
         }
-
         public override int GetHashCode()
         {
             return (patterns != null ? patterns.GetHashCode() : 0);

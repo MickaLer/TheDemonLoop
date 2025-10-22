@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followingPatternDelay: 0
   steps:
-  - direction: 1
+  - direction: -1
     duration: 20
     speed: 100
     spawnedLasers:

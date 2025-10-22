@@ -16,13 +16,11 @@ namespace Patterns
         
         public override IEnumerator Do()
         {
-            Step[] tempSteps = new Step[steps.Count];
-            steps.CopyTo(tempSteps);
             int currentIndex = 0;
             Transform bossTransform = GameManager.CurrentBoss.gameObject.transform;
             while (true)
             {
-                _currentStep = tempSteps[currentIndex];
+                _currentStep = steps[currentIndex];
 
                 List<LineRenderer> tempObjects = new List<LineRenderer>();
                     

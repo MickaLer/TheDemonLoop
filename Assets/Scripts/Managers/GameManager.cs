@@ -7,6 +7,7 @@ namespace Managers
 
         public static void StartFight(BossBehaviour currentBoss)
         {
+            //Stock currentBoss static reference for pattern use
             _currentBoss = currentBoss;
         }
     }

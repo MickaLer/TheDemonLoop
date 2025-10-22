@@ -17,6 +17,8 @@ namespace Editor.Windows.PatternEditor
             wnd.titleContent = new GUIContent("LaserPattern_" + currentPattern.name);
         }
         
+        private Vector2 _scrollPositionLeft;
+        private Vector2 _scrollPositionRight;
         private Color _baseColor;
         private int _selectedStep;
         private int _selectedLaser;
@@ -31,8 +33,6 @@ namespace Editor.Windows.PatternEditor
             }
         }
 
-        private Vector2 _scrollPositionLeft;
-        private Vector2 _scrollPositionRight;
 
         private void OnEnable()
         {
@@ -59,10 +59,13 @@ namespace Editor.Windows.PatternEditor
         void StepsPanel()
         {
             GUILayout.BeginVertical();
+            //Show steps
             GUILayout.Label("List of steps :");
             _scrollPositionLeft = GUILayout.BeginScrollView(_scrollPositionLeft);
             SelectedStep = GUILayout.SelectionGrid(SelectedStep, _currentPattern.steps.Select(o => o.order.ToString()).ToArray(), 1);
             GUILayout.EndScrollView();
+            
+            //Create and delete steps
             GUILayout.BeginHorizontal();
             GUI.color = Color.green;
             if (GUILayout.Button("Add"))
@@ -72,13 +75,10 @@ namespace Editor.Windows.PatternEditor
                     spawnedLasers = new()
                 };
                 _currentPattern.steps.Add(newStep);
-                _currentPattern.steps = _currentPattern.steps.OrderBy(o => o.order).ToList();
                 EditorUtility.SetDirty(_currentPattern);
                 SelectedStep = _currentPattern.steps.Count - 1;
             }
-
             GUI.color = _baseColor;
-
             GUI.color = Color.red;
             if (GUILayout.Button("Remove"))
             {
@@ -86,10 +86,10 @@ namespace Editor.Windows.PatternEditor
                 SelectedStep = 0;
                 ReorderSteps();
             }
-
             GUI.color = _baseColor;
             GUILayout.EndHorizontal();
 
+            //Edit step order
             if (GUILayout.Button("EditOrder"))
             {
                 int oldName = _currentPattern.steps[SelectedStep].order;
@@ -113,16 +113,22 @@ namespace Editor.Windows.PatternEditor
         {
             if (SelectedStep >= _currentPattern.steps.Count) return;
             SpawnLaserPattern.Step currentStep = _currentPattern.steps[SelectedStep];
+            
+            //Modify step properties
             GUILayout.BeginVertical();
             currentStep.direction = EditorGUILayout.FloatField("Direction",currentStep.direction);
             currentStep.speed = EditorGUILayout.FloatField("Speed",currentStep.speed);
             currentStep.duration = EditorGUILayout.FloatField("Duration",currentStep.duration);
             GUILayout.EndVertical();
+            
             GUILayout.BeginVertical();
+            //Show lasers
             GUILayout.Label("List of lasers :");
             _scrollPositionRight = GUILayout.BeginScrollView(_scrollPositionRight);
             _selectedLaser = GUILayout.SelectionGrid(_selectedLaser, _laserCounts.ToArray(), 1);
             GUILayout.EndScrollView();
+            
+            //Add or remove lasers
             GUILayout.BeginHorizontal();
             GUI.color = Color.green;
             if (GUILayout.Button("Add"))
@@ -132,9 +138,7 @@ namespace Editor.Windows.PatternEditor
                 _selectedLaser = currentStep.spawnedLasers.Count - 1;
                 MakeNewLasersList(SelectedStep);
             }
-
             GUI.color = _baseColor;
-
             GUI.color = Color.red;
             if (GUILayout.Button("Remove"))
             {
@@ -142,17 +146,21 @@ namespace Editor.Windows.PatternEditor
                 _selectedLaser = 0;
                 MakeNewLasersList(SelectedStep);
             }
-
             GUI.color = _baseColor;
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
+            
+            // Show current laser properties 
             if (currentStep.spawnedLasers.Count > 0) currentStep.spawnedLasers[_selectedLaser] = LaserModifierPanel(currentStep.spawnedLasers[_selectedLaser]);
+            
+            //Save and apply changes
             _currentPattern.steps[SelectedStep] = currentStep;
             EditorUtility.SetDirty(_currentPattern);
         }
 
         SpawnLaserPattern.Laser LaserModifierPanel(SpawnLaserPattern.Laser currentState)
         {
+            //Modify lasers properties
             SpawnLaserPattern.Laser temp = currentState;
             GUILayout.BeginVertical();
             temp.angle = EditorGUILayout.FloatField("Angle",temp.angle);
@@ -165,6 +173,7 @@ namespace Editor.Windows.PatternEditor
         void MakeNewLasersList(int newIndex)
         {
             if (newIndex >= _currentPattern.steps.Count) return;
+            // Create a laser index list so that it is usable with SelectionGrid
             _laserCounts.Clear();
             for (int i = 0; i < _currentPattern.steps[newIndex].spawnedLasers.Count; i++)
             {

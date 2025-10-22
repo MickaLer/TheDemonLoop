@@ -15,5 +15,7 @@ MonoBehaviour:
   bossPatterns:
   - patterns:
     - {fileID: 11400000, guid: 57db0bb908111f84d832261c0527df43, type: 2}
+    - {fileID: 11400000, guid: cfa4ec59d9457ce4e8b0bad2ab324b7b, type: 2}
   maxLife: 1000
   bossSprite: {fileID: 2800000, guid: f6daec291b469274195d3effa489d47f, type: 3}
+  patternCooldown: 5
