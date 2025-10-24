@@ -295,6 +295,7 @@ namespace Editor.Windows
                     LaserPatternWindow.ShowWindow(pattern);
                     break;
                 case MovingPattern:
+                    MovingPatternWindow.ShowWindow(pattern);
                     break;
             }
         }
@@ -330,7 +331,7 @@ namespace Editor.Windows
 
             GUI.color = _baseColor;
             //If put at -1, it will play the next pattern along this one
-            //currentPattern.followingPatternDelay = EditorGUILayout.FloatField(currentPattern.followingPatternDelay,new GUIContent("","If put at -1, it will play the next pattern along this one"));
+            currentPattern.followingPatternDelay = EditorGUILayout.FloatField(currentPattern.followingPatternDelay);
         }
 
         private void LoadSelectedBoss(int selected)

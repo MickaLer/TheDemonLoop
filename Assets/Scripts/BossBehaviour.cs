@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public abstract class BossBehaviour : MonoBehaviour
 {
+    public Action<Collision2D> OnBorderHit;
     [SerializeField] protected List<BossPhase> bossPhases = new();
     protected Damageable DamageableComp;
     protected BossPhase CurrentPhase;
@@ -16,6 +17,8 @@ public abstract class BossBehaviour : MonoBehaviour
     private float _innerTimer;
     private bool _launchingAttack;
     private Coroutine _attackCoroutine;
+    
+    //Override it to change behavior
     protected virtual void Update()
     {
         if(!_launchingAttack) _innerTimer += Time.deltaTime;
@@ -32,9 +35,8 @@ public abstract class BossBehaviour : MonoBehaviour
     {
         foreach (var currentPattern in pattern)
         {
-            // If the followingPatternDelay is -1, that means that the next pattern will be played along the current one
-            // ReSharper disable CompareOfFloatsByEqualityOperator once
-            if (currentPattern.followingPatternDelay == -1)
+            // If the followingPatternDelay is lower than 0, that means that the next pattern will be played along the current one
+            if (currentPattern.followingPatternDelay < 0)
             {
                 StartCoroutine(currentPattern.Do());
                 continue;
@@ -65,5 +67,10 @@ public abstract class BossBehaviour : MonoBehaviour
         CurrentPhase = bossPhases[0];
         DamageableComp.ChangeMaxLife(CurrentPhase.maxLife);
         OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Border")) OnBorderHit?.Invoke(other);
     }
 }

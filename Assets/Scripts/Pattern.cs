@@ -5,4 +5,5 @@ public abstract class Pattern : ScriptableObject
 {
     public float followingPatternDelay;
     public abstract IEnumerator Do();
+    protected float InnerCount;
 }

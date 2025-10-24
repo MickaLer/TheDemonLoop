@@ -11,13 +11,13 @@ namespace Patterns
     {
         public List<Step> steps =  new();
         private Step _currentStep;
-
-        private float _innerCount;
         
         public override IEnumerator Do()
         {
+            Debug.Log(name);
             int currentIndex = 0;
             Transform bossTransform = GameManager.CurrentBoss.gameObject.transform;
+            InnerCount = 0;
             while (true)
             {
                 _currentStep = steps[currentIndex];
@@ -30,10 +30,10 @@ namespace Patterns
                     tempObjects.Add(temp.GetComponent<LineRenderer>());
 
                     tempObjects.Last().SetPosition(0, temp.transform.position);
-                    ModifyLaser(tempObjects.Last(), currentLaser.angle);
+                    ModifyLaser(tempObjects.Last(), currentLaser.angle, bossTransform);
                 }
 
-                while (_innerCount < _currentStep.duration)
+                while (InnerCount < _currentStep.duration)
                 {
                     if (_currentStep.direction != 0)
                     {
@@ -41,11 +41,11 @@ namespace Patterns
                         {
                             var tempLaser = tempObjects[index];
                             var spawnLaser = _currentStep.spawnedLasers[index];
-                            ModifyLaser(tempLaser, spawnLaser.angle + _innerCount * _currentStep.speed * _currentStep.direction);
+                            ModifyLaser(tempLaser, spawnLaser.angle + InnerCount * _currentStep.speed * _currentStep.direction, bossTransform);
                         }
                     }
                     
-                    _innerCount += Time.deltaTime;
+                    InnerCount += Time.deltaTime;
                     yield return new WaitForEndOfFrame();
                 }
 
@@ -58,18 +58,21 @@ namespace Patterns
                 }
                 tempObjects.Clear();
                 yield return new WaitForEndOfFrame();
-                _innerCount = 0;
+                InnerCount = 0;
                 currentIndex++;
                 if (currentIndex >= steps.Count) break;
             }
         }
 
-        private void ModifyLaser(LineRenderer laser, float angle)
+        private void ModifyLaser(LineRenderer laser, float angle, Transform boss)
         {
             float deg2Rad = Mathf.Deg2Rad * angle;
             Vector2 direction = new Vector2(Mathf.Sin(deg2Rad), Mathf.Cos(deg2Rad));
-            var hit2D = Physics2D.Raycast(laser.transform.position, direction);
+            LayerMask mask = ~0;
+            mask -= LayerMask.GetMask("Boss");
+            var hit2D = Physics2D.Raycast(laser.transform.position, direction, 100.0f, mask); 
             
+            laser.SetPosition(0, boss.position);
             if (hit2D.collider)
             {
                 laser.SetPosition(1, hit2D.point);
