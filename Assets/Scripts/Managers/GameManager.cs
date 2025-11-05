@@ -10,5 +10,10 @@ namespace Managers
             //Stock currentBoss static reference for pattern use
             _currentBoss = currentBoss;
         }
+
+        public static void EndFight()
+        {
+            _currentBoss = null;
+        }    
     }
 }

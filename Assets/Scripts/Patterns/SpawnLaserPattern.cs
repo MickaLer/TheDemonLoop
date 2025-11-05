@@ -10,17 +10,15 @@ namespace Patterns
     public class SpawnLaserPattern : Pattern
     {
         public List<Step> steps =  new();
-        private Step _currentStep;
         
         public override IEnumerator Do()
         {
-            Debug.Log(name);
             int currentIndex = 0;
             Transform bossTransform = GameManager.CurrentBoss.gameObject.transform;
             InnerCount = 0;
             while (true)
             {
-                _currentStep = steps[currentIndex];
+                Step _currentStep = steps[currentIndex];
 
                 List<LineRenderer> tempObjects = new List<LineRenderer>();
                     
@@ -28,7 +26,7 @@ namespace Patterns
                 {
                     GameObject temp = Instantiate(currentLaser.spawned, bossTransform.position, Quaternion.identity, bossTransform);
                     tempObjects.Add(temp.GetComponent<LineRenderer>());
-
+                    temp.GetComponent<LaserDamageDealer>().owner = bossTransform.gameObject;
                     tempObjects.Last().SetPosition(0, temp.transform.position);
                     ModifyLaser(tempObjects.Last(), currentLaser.angle, bossTransform);
                 }
@@ -70,6 +68,8 @@ namespace Patterns
             Vector2 direction = new Vector2(Mathf.Sin(deg2Rad), Mathf.Cos(deg2Rad));
             LayerMask mask = ~0;
             mask -= LayerMask.GetMask("Boss");
+            mask -= LayerMask.GetMask("Player");
+            mask -= LayerMask.GetMask("Ignore Raycast");
             var hit2D = Physics2D.Raycast(laser.transform.position, direction, 100.0f, mask); 
             
             laser.SetPosition(0, boss.position);
@@ -92,7 +92,6 @@ namespace Patterns
         public struct Laser
         {
             public float angle;
-            public float radius;
             public GameObject spawned;
         }
     }

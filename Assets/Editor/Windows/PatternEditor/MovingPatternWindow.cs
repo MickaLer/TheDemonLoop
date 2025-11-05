@@ -44,6 +44,8 @@ namespace Editor.Windows.PatternEditor
         void StepsPanel()
         {
             GUILayout.BeginVertical();
+            _currentPattern.returnBehaviour = (MovingPattern.ReturnBehaviour)EditorGUILayout.EnumFlagsField("ReturnBehaviour",_currentPattern.returnBehaviour);
+            _currentPattern.returnDuration = EditorGUILayout.FloatField("ReturnDuration",_currentPattern.returnDuration);
             //Show steps
             GUILayout.Label("List of steps :");
             _scrollPositionLeft = GUILayout.BeginScrollView(_scrollPositionLeft);

@@ -164,7 +164,6 @@ namespace Editor.Windows.PatternEditor
             SpawnLaserPattern.Laser temp = currentState;
             GUILayout.BeginVertical();
             temp.angle = EditorGUILayout.FloatField("Angle",temp.angle);
-            temp.radius = EditorGUILayout.FloatField("Radius",temp.radius);
             temp.spawned = EditorGUILayout.ObjectField("Spawned",temp.spawned,typeof(GameObject),false) as GameObject;
             GUILayout.EndVertical();
             return temp;

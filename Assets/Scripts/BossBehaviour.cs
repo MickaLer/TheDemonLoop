@@ -55,7 +55,8 @@ public abstract class BossBehaviour : MonoBehaviour
         CurrentPhase = bossPhases[0];
         
         //Load the sprite stocked inside the phase
-        OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+		if(CurrentPhase.bossSprite != null)
+     		 OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
         GameManager.StartFight(this);
         DamageableComp.OnDeath += ChangePhase;
     }
@@ -64,9 +65,19 @@ public abstract class BossBehaviour : MonoBehaviour
     {
         if(_launchingAttack)StopCoroutine(_attackCoroutine);
         bossPhases.RemoveAt(0);
-        CurrentPhase = bossPhases[0];
-        DamageableComp.ChangeMaxLife(CurrentPhase.maxLife);
-        OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+        if(bossPhases.Count == 0) DeathBehavior();
+        else
+        {
+            CurrentPhase = bossPhases[0];
+            DamageableComp.ChangeMaxLife(CurrentPhase.maxLife);
+            OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+        }
+    }
+
+    protected virtual void DeathBehavior()
+    {
+        Destroy(gameObject);
+        GameManager.EndFight();
     }
 
     private void OnCollisionEnter2D(Collision2D other)
