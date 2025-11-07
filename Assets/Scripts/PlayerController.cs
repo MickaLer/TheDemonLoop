@@ -9,12 +9,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpPower;
     [SerializeField] private float doubleJumpPower;
     [SerializeField] private float dashPower;
+    [SerializeField] private float attackCooldown;
     [SerializeField] private GameObject attackHitBox;
     private bool _canJump;
     private bool _doubleJump;
 
     private Rigidbody2D _rigidbody;
     private float _directionLooking = 1;
+    private float _innerTimer;
     
     private void Awake()
     {
@@ -25,6 +27,9 @@ public class PlayerController : MonoBehaviour
     {
         while (true)
         {
+            _innerTimer += Time.deltaTime;
+            
+            //MOVEMENT
             Vector2 direction = InputSystem.actions.FindAction("Move").ReadValue<Vector2>();
             _rigidbody.linearVelocity = new Vector2(direction.x * moveSpeed, _rigidbody.linearVelocity.y);
             if (direction.x != 0)
@@ -36,7 +41,7 @@ public class PlayerController : MonoBehaviour
             //ACTIONS
             if (InputSystem.actions.FindAction("Jump").triggered && (_canJump ||_doubleJump)) yield return StartCoroutine(Jump());
             if (InputSystem.actions.FindAction("Dash").triggered) yield return StartCoroutine(Dash());
-            if (InputSystem.actions.FindAction("Attack").triggered) yield return StartCoroutine(Attack());
+            if (InputSystem.actions.FindAction("Attack").triggered && _innerTimer > attackCooldown) yield return StartCoroutine(Attack());
             
             yield return new WaitForEndOfFrame();
         }
@@ -44,7 +49,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Jump()
     {
-        _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.linearVelocity = new Vector2(_rigidbody.linearVelocity.x, 0);;
         _doubleJump = _canJump;
         _canJump = false;
         _rigidbody.AddForce(Vector2.up * (_doubleJump ? jumpPower : doubleJumpPower), ForceMode2D.Impulse);
@@ -53,14 +58,20 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash()
     {
+        float originalGravityScale = _rigidbody.gravityScale;
+        _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.gravityScale = 0;
+        
         _rigidbody.AddForce(Vector2.right * (_directionLooking * dashPower), ForceMode2D.Impulse);
         yield return new WaitForSeconds(0.2f);
         _rigidbody.linearVelocity = Vector2.zero;
+        _rigidbody.gravityScale = originalGravityScale;
         yield return null;
     }
     
     private IEnumerator Attack()
     {
+        _innerTimer = 0;
         attackHitBox.SetActive(true);
         yield return new WaitForSeconds(0.1f);
         attackHitBox.SetActive(false);
@@ -69,12 +80,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        _canJump = true;
-        _doubleJump = true;
+        if (other.CompareTag("Border"))
+        {
+            _canJump = true;
+            _doubleJump = true;
+        }
     }
     
     private void OnTriggerExit2D(Collider2D other)
     {
-        _canJump = false;
+        if (other.CompareTag("Border")) _canJump = false;
     }
 }
