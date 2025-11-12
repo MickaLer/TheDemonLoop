@@ -116,7 +116,6 @@ namespace Editor.Windows.PatternEditor
             
             //Modify step properties
             GUILayout.BeginVertical();
-            currentStep.direction = EditorGUILayout.FloatField("Direction",currentStep.direction);
             currentStep.speed = EditorGUILayout.FloatField("Speed",currentStep.speed);
             currentStep.duration = EditorGUILayout.FloatField("Duration",currentStep.duration);
             GUILayout.EndVertical();
@@ -164,6 +163,8 @@ namespace Editor.Windows.PatternEditor
             SpawnLaserPattern.Laser temp = currentState;
             GUILayout.BeginVertical();
             temp.angle = EditorGUILayout.FloatField("Angle",temp.angle);
+            temp.maxAngle = EditorGUILayout.FloatField("MaxAngle",temp.maxAngle);
+            temp.direction = EditorGUILayout.FloatField("Direction",temp.direction);
             temp.spawned = EditorGUILayout.ObjectField("Spawned",temp.spawned,typeof(GameObject),false) as GameObject;
             GUILayout.EndVertical();
             return temp;

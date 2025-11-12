@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -5949498031000132867}
   - component: {fileID: 5401937392969844042}
   m_Layer: 2
-  m_Name: Laser
+  m_Name: InstantLaser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,4 +199,5 @@ MonoBehaviour:
   owner: {fileID: 0}
   damages: 10
   destroyWhenHit: 0
+  instantSpawn: 1
   timeBeforeActivation: 3

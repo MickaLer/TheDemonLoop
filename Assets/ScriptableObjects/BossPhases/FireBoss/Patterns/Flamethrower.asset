@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 217017ffb8f0a5e4c9ec65e8e1db900f, type: 3}
+  m_Name: Flamethrower
+  m_EditorClassIdentifier: 
+  followingPatternDelay: 5
+  steps:
+  - targetType: 1
+    order: 0
+    ballNumbers: 0
+    timeBetweenBalls: 0
+    ballPrefab: {fileID: 0}
+    duration: 5
+    followAfterSpawn: 1
+    laserPrefab: {fileID: 3721614158482739708, guid: 71cdc227cd3218847810f30daea76b6b, type: 3}
+    speed: 0
+    chargingTime: 0
+    spawnedObject: {fileID: 0}

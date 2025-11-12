@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bossPatterns:
   - patterns:
-    - {fileID: 11400000, guid: 57db0bb908111f84d832261c0527df43, type: 2}
-    - {fileID: 11400000, guid: 594a7880d73aa884eab83a5ca09e8e95, type: 2}
+    - {fileID: 11400000, guid: 4695f18612ab75645901f427dfef8d87, type: 2}
+    - {fileID: 11400000, guid: fcf5a77f336cdb442b8f979aeca08f0d, type: 2}
   maxLife: 1000
   bossSprite: {fileID: 0}
   patternCooldown: 5

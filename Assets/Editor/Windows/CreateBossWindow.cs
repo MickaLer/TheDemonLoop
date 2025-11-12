@@ -255,6 +255,10 @@ namespace Editor.Windows
                             patternList.patterns.Add(CreatePattern<MovingPattern>("newMovingPattern"));
                             EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
                         });
+                    contextMenu.AddItem(new GUIContent("TargetPlayer"), false, () => {
+                        patternList.patterns.Add(CreatePattern<TargetPlayerPattern>("newTargetPlayerPattern"));
+                        EditorUtility.SetDirty(_bossPhases[_selectedPhase]);
+                    });
                     contextMenu.ShowAsContext();
                 }
 
@@ -296,6 +300,9 @@ namespace Editor.Windows
                     break;
                 case MovingPattern:
                     MovingPatternWindow.ShowWindow(pattern);
+                    break;
+                case TargetPlayerPattern:
+                    TargetPlayerPatternWindow.ShowWindow(pattern);
                     break;
             }
         }
