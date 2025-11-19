@@ -18,6 +18,7 @@ namespace Patterns
             int indexStep = 0;
             Transform bossTransform = GameManager.CurrentBoss.gameObject.transform;
             InnerCount = 0;
+            
             while (true)
             {
                 Step currentStep = steps[indexStep];

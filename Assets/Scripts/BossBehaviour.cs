@@ -12,7 +12,7 @@ public abstract class BossBehaviour : MonoBehaviour
     [SerializeField] protected List<BossPhase> bossPhases = new();
     protected Damageable DamageableComp;
     protected BossPhase CurrentPhase;
-    protected SpriteRenderer OwnSprite;
+    protected GameObject OwnObject;
 
     private float _innerTimer;
     private bool _launchingAttack;
@@ -51,12 +51,11 @@ public abstract class BossBehaviour : MonoBehaviour
     protected virtual void Awake()
     {
         DamageableComp = GetComponent<Damageable>();
-        OwnSprite = GetComponent<SpriteRenderer>();
         CurrentPhase = bossPhases[0];
         
         //Load the sprite stocked inside the phase
-		if(CurrentPhase.bossSprite != null)
-     		 OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+		if(CurrentPhase.bossObject != null)
+            OwnObject = Instantiate(CurrentPhase.bossObject, transform);
         GameManager.StartFight(this);
         DamageableComp.OnDeath += ChangePhase;
     }
@@ -70,7 +69,8 @@ public abstract class BossBehaviour : MonoBehaviour
         {
             CurrentPhase = bossPhases[0];
             DamageableComp.ChangeMaxLife(CurrentPhase.maxLife);
-            OwnSprite.sprite = Sprite.Create(CurrentPhase.bossSprite, new Rect(0, 0, CurrentPhase.bossSprite.width, CurrentPhase.bossSprite.height), new Vector2(0.5f, 0.5f), 100);
+            Destroy(OwnObject);
+            OwnObject = Instantiate(CurrentPhase.bossObject, transform);
         }
     }
 

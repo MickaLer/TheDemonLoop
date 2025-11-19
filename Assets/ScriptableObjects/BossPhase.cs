@@ -10,7 +10,7 @@ namespace ScriptableObjects
         
         public List<BossPhaseData> bossPatterns = new();
         public float maxLife;
-        public Texture2D bossSprite;
+        public GameObject bossObject;
         public float patternCooldown;
     }
 

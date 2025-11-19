@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb462187c85f42d4a99c729f6dc3ee28, type: 3}
   m_Name: RedFlameSword
   m_EditorClassIdentifier: 
-  followingPatternDelay: 0
+  followingPatternDelay: 3
   steps:
   - duration: 10
     speed: 75
     spawnedLasers:
-    - direction: 1
+    - direction: 0
       angle: 70
       maxAngle: 250
       spawned: {fileID: 3721614158482739708, guid: e63d633c2c6ba2b4584765cfafaad34c, type: 3}

@@ -17,5 +17,5 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 4695f18612ab75645901f427dfef8d87, type: 2}
     - {fileID: 11400000, guid: fcf5a77f336cdb442b8f979aeca08f0d, type: 2}
   maxLife: 1000
-  bossSprite: {fileID: 0}
+  bossObject: {fileID: 1593887519104300269, guid: ced5084840a93184e8ebf3f5ea4e5ea1, type: 3}
   patternCooldown: 5
